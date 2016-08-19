@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			#mx{
+				width:600px;
+				height:30px;
+				background-color:red;
+				border: solid 1px black;
+				float: right;
+			}
+			#cx{
+				width:0px;
+				height:30px;
+				background-color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="mx" style="display: none;">
+			<div id="cx"></div>
+		</div>
+		<br />
+		<center>
+		<h1>请选择关卡</h1>
+		<input type="text" id="count" />
+		<input type="button" onclick="addtable()" value="开始" />
+		<hr />
+		<hr />
+		<div id="div1"></div>
+		</center>
+	</body>
+	<script>
+		//显示生命条
+		function showmx(){
+			document.getElementById("mx").style.display="block";
+		}
+		//创建游戏界面表格
+		var tableid="tabletemp";
+		function addtable(){
+			var count=window.parseInt(document.getElementById("count").value);
+			count=2*count;
+			var div=document.getElementById("div1")
+			var table=document.createElement("table");
+			
+			table.id=tableid;
+			var cellid=1;
+			for(var i=0;i<count;i++){
+				var row=table.insertRow();
+				for(var j=0;j<count;j++){
+					var cell=row.insertCell();
+					cell.style.width="43px";
+					cell.style.height="43px";
+					cell.style.backgroundColor="#e7e7e7";
+					cell.id="cell"+cellid;
+					cell.onclick=cellclick;
+					cellid++;
+				}
+			}
+			div.appendChild(table);
+			creater();
+		}
+		
+		var arrrandom=new Array();
+		var arrback=new Array();
+		//产生随机数
+		function creater(){
+			showmx();
+			var count=window.parseInt(document.getElementById("count").value);
+			count=4*Math.pow(count,2);
+			for(var i=0;i<count;i++){
+				var num=Math.random()*count+1;
+				var num1=Math.floor(num);
+				if(i==0){
+					arrrandom[i]=num1;
+				}else{
+					var flag=true;
+					for(var j=0;j<arrrandom.length;j++){
+						if(num1==arrrandom[j]){
+							i--;
+							flag=false;
+							break;
+						}
+					}
+					if(flag==true){
+						arrrandom[i]=num1;
+					}
+				}
+			}
+			//alert(arrrandom);
+			for(var i=1;i<=arrrandom.length;i++){
+				var imgindex=1;
+				if(i<=count/2){
+					imgindex=i;
+				}else{
+					imgindex=i-count/2;
+				}
+				document.getElementById("cell"+arrrandom[i-1]).style.backgroundImage="url(img/"+imgindex+".gif)";
+				arrback[i-1]=arrrandom[i-1]+"_"+imgindex;
+			}
+			setTimeout(hidetable,3000);
+		}
+		//将所有单元格的背景还原
+		function hidetable(){
+			var count=window.parseInt(document.getElementById("count").value);
+			count=4*Math.pow(count,2);
+			for(var i=1;i<=count;i++){
+				document.getElementById("cell"+i).style.backgroundImage="";
+			}
+			lifvalue();
+		}
+		var mxlen=600;
+		var cxlen=0;
+		//生命值改变函数
+		function lifvalue(){
+			document.getElementById("cx").style.width=cxlen+"px";
+			cxlen++;
+			if(cxlen<mxlen){
+				live=setTimeout(lifvalue,100);	
+			}else{
+				alert("GAME OVER!");
+			}
+		}
+		
+		var clickone=null;
+		var clicktwo=null;
+		//点击单元格事件
+		function cellclick(){
+			var target=event.srcElement;
+			var cellid=target.id;
+			cellid=parseInt(cellid.substring(4));
+			for(var i=0;i<arrback.length;i++){
+				var celldate=arrback[i].split("_");
+				if(celldate[0]==cellid){
+					target.style.backgroundImage="url(img/"+celldate[1]+".gif)";
+				}
+			}
+			
+			if(clickone==null){
+				clickone=target;
+			}else{
+				clicktwo=event.srcElement;
+				if(clickone.style.backgroundImage==clicktwo.style.backgroundImage){
+					clickone=null;
+					clicktwo=null;
+					checkwin();
+				}else{
+					setTimeout(changeback,500);
+				}
+			}
+		}
+		//改变背景颜色
+		function changeback(){
+			clickone.style.backgroundImage="";
+			clicktwo.style.backgroundImage="";
+			clickone=null;
+			clicktwo=null;
+		}
+		//判断是否赢了
+		function checkwin(){
+			var flag=true;
+			var count=window.parseInt(document.getElementById("count").value);
+			count=4*Math.pow(count,2);
+			for(var i=1;i<=count;i++){
+				if(document.getElementById("cell"+i).style.backgroundImage==""){
+					flag=false;
+				}
+			}
+			if(flag==true){
+				document.getElementById("mx").style.display="none";
+				cxlen=0;
+				document.getElementById("cx").style.width=cxlen+"px";
+				document.getElementById("tabletemp").remove();
+				clearTimeout(live);
+				arrrandom=[];
+				arrback=[];
+				var count=window.parseInt(document.getElementById("count").value);
+				document.getElementById("count").value=count+1;
+				//alert(window.parseInt(document.getElementById("count").value));
+				var result=confirm("恭喜您，您通过了本关，进行下一关");
+				if(result==true){
+					addtable();
+				}
+			}
+		}
+	</script>
+</html>
